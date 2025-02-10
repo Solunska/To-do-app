@@ -4,6 +4,8 @@ const input = document.getElementById("input");
 const addButton = document.getElementById("addTask");
 const tasks = document.getElementById("tasks");
 
+let editingTask = null;
+
 addButton.addEventListener("click", addToDo);
 input.addEventListener("keypress", (e) => {
     if (e.key === "Enter") addToDo();
@@ -17,17 +19,24 @@ function addToDo() {
         return;
     };
 
-    const li = document.createElement("li");
-    li.innerHTML = `<div class="todo">${todo}</div>
+    if (editingTask) {
+        editingTask.querySelector(".todo").textContent = todo;
+        editingTask = null;
+    } else {
+        const li = document.createElement("li");
+        li.innerHTML = `<div class="todo">${todo}</div>
                     <div class="btn-container">
                         <input class="checkbox" type="checkbox" />
+                         <button class="edit">Edit</button>
                         <button class="delete">x</button>
                     </div>`;
 
-    tasks.appendChild(li);
+        tasks.appendChild(li);
 
-    li.querySelector(".delete").addEventListener("click", deleteTodo);
-    li.querySelector(".checkbox").addEventListener("click", toggleComplete);
+        li.querySelector(".checkbox").addEventListener("click", toggleComplete);
+        li.querySelector(".delete").addEventListener("click", deleteTodo);
+        li.querySelector(".edit").addEventListener("click", editTodo);
+    }
 
     input.value = "";
     saveTodos();
@@ -38,6 +47,14 @@ function toggleComplete(event) {
     todoText.classList.toggle("done");
 
     saveTodos();
+}
+
+function editTodo(event) {
+    const todoText = event.target.closest("li").querySelector(".todo");
+    console.log(todoText);
+
+    input.value = todoText.textContent;
+    editingTask = todoText.closest("li");
 }
 
 function deleteTodo(event) {
@@ -66,6 +83,7 @@ function loadTasks() {
         li.innerHTML = `<div class="todo">${todo.text}</div>
                     <div class="btn-container">
                         <input class="checkbox" type="checkbox" />
+                        <button class="edit">Edit</button>
                         <button class="delete">x</button>
                     </div>`;
         if (todo.done) {
@@ -74,6 +92,7 @@ function loadTasks() {
         }
         li.querySelector(".delete").addEventListener("click", deleteTodo);
         li.querySelector(".checkbox").addEventListener("click", toggleComplete);
+        li.querySelector(".edit").addEventListener("click", editTodo);
 
         tasks.appendChild(li);
     });
